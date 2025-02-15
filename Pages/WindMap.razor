@@ -1,0 +1,302 @@
+@page "/wind-map"
+@inject IJSRuntime JSRuntime
+@inject ISnackbar Snackbar
+@inject WindyService WindyService
+@inject IConfiguration Configuration
+
+<div class="map-container">
+    <div class="nav-bar">
+        <div class="search-container">
+            <MudAutocomplete T="string"
+                            @bind-Value="searchQuery"
+                            SearchFunc="@SearchLocations"
+                            Placeholder="Search location..."
+                            AdornmentIcon="@Icons.Material.Filled.Search"
+                            Adornment="Adornment.Start"
+                            Class="search-input" />
+            <MudIconButton Icon="@Icons.Material.Filled.MyLocation" 
+                          OnClick="GetCurrentLocation"
+                          Class="location-button" />
+        </div>
+        
+        <div class="weather-controls">
+            <MudButton OnClick="@(() => SwitchLayer("wind"))" Class="@GetLayerButtonClass("wind")">
+                <MudIcon Icon="@Icons.Material.Filled.Air" Class="mr-2" />WIND
+            </MudButton>
+            <MudButton OnClick="@(() => SwitchLayer("temperature"))" Class="@GetLayerButtonClass("temperature")">
+                <MudIcon Icon="@Icons.Material.Filled.Thermostat" Class="mr-2" />TEMPERATURE
+            </MudButton>
+            <MudButton OnClick="@(() => SwitchLayer("rain"))" Class="@GetLayerButtonClass("rain")">
+                <MudIcon Icon="@Icons.Material.Filled.WaterDrop" Class="mr-2" />RAIN
+            </MudButton>
+            <MudButton OnClick="@(() => SwitchLayer("clouds"))" Class="@GetLayerButtonClass("clouds")">
+                <MudIcon Icon="@Icons.Material.Filled.Cloud" Class="mr-2" />CLOUDS
+            </MudButton>
+        </div>
+    </div>
+
+    <div id="map" class="wind-map"></div>
+
+    @if (showForecast)
+    {
+        <MudPaper Class="forecast-popup" Elevation="3">
+            <MudText Typo="Typo.h6">Weather at @selectedLocation</MudText>
+            <MudDivider Class="my-2"/>
+            <MudList T="string" Dense="true" Clickable="false">
+                <MudListItem T="string" Text="@($"Temperature: {forecast.Temperature:F1}°C")" />
+                <MudListItem T="string" Text="@($"Wind Speed: {forecast.WindSpeed:F1} m/s")" />
+                <MudListItem T="string" Text="@($"Wind Direction: {forecast.WindDirection:F0}°")" />
+                <MudListItem T="string" Text="@($"Rain: {forecast.Rain:F1} mm")" />
+                <MudListItem T="string" Text="@($"Clouds: {forecast.Clouds:F0}%")" />
+                <MudListItem T="string" Text="@($"Humidity: {forecast.Humidity:F0}%")" />
+            </MudList>
+            <MudButton OnClick="@CloseForecast" Color="Color.Error" Class="mt-2">Close</MudButton>
+        </MudPaper>
+    }
+</div>
+
+<style>
+    .map-container {
+        position: relative;
+        width: 100%;
+        height: 100vh;
+        overflow: hidden;
+    }
+
+    .wind-map {
+        width: 100%;
+        height: 100%;
+        background: #f5f5f5;
+    }
+
+    .nav-bar {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 1000;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 8px 16px;
+        background: rgba(33, 33, 33, 0.95);
+        backdrop-filter: blur(10px);
+    }
+
+    .search-container {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .search-input {
+        width: 300px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 4px;
+    }
+
+    .weather-controls {
+        display: flex;
+        gap: 2px;
+        background: rgba(0, 0, 0, 0.3);
+        padding: 4px;
+        border-radius: 4px;
+    }
+
+    .weather-btn {
+        color: rgba(255, 255, 255, 0.8) !important;
+        padding: 6px 16px !important;
+        font-size: 0.875rem !important;
+        min-width: unset !important;
+    }
+
+    .weather-btn.active {
+        color: #fff !important;
+        background-color: rgba(255, 255, 255, 0.1) !important;
+    }
+
+    .timeline-container {
+        position: absolute;
+        bottom: 24px;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 1000;
+        width: 80%;
+        max-width: 800px;
+    }
+
+    .timeline-paper {
+        background: rgba(33, 33, 33, 0.9) !important;
+        padding: 8px 16px;
+        border-radius: 4px;
+    }
+
+    .timeline-slider {
+        min-width: 500px;
+    }
+
+    ::deep .mud-input {
+        color: #fff !important;
+    }
+
+    ::deep .mud-input-root {
+        padding: 8px 12px !important;
+    }
+
+    ::deep .mud-input-adornment {
+        color: rgba(255, 255, 255, 0.7) !important;
+    }
+
+    .location-button {
+        background: rgba(255, 255, 255, 0.1);
+    }
+
+    .forecast-popup {
+        position: absolute;
+        bottom: 20px;
+        left: 20px;
+        z-index: 1000;
+        padding: 16px;
+        background: rgba(33, 33, 33, 0.95);
+        color: white;
+        min-width: 250px;
+    }
+</style>
+
+@code {
+    private string searchQuery = "";
+    private string mapForecastKey;
+    private string currentLayer = "wind";
+    private bool showForecast;
+    private string selectedLocation = "";
+    private WeatherForecast forecast = new();
+    private IJSObjectReference _module;
+
+    protected override async Task OnInitializedAsync()
+    {
+        mapForecastKey = Configuration["WindyApi:MapForecastKey"];
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            _module = await JSRuntime.InvokeAsync<IJSObjectReference>("import", "./js/windMap.js");
+            await _module.InvokeVoidAsync("initMap", DotNetObjectReference.Create(this), mapForecastKey);
+        }
+    }
+
+    [JSInvokable]
+    public async Task OnMapClick(double lat, double lon)
+    {
+        try
+        {
+            var data = await WindyService.GetPointForecastAsync(lat, lon);
+            forecast = new WeatherForecast
+            {
+                Temperature = data.Temp[0],
+                WindSpeed = data.Wind[0],
+                WindDirection = data.WindDir[0],
+                Rain = data.Precip[0],
+                Clouds = data.Clouds[0],
+                Humidity = data.Rh[0]
+            };
+            selectedLocation = $"{lat:F2}°, {lon:F2}°";
+            showForecast = true;
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error getting forecast: {ex.Message}");
+        }
+    }
+
+    private void CloseForecast()
+    {
+        showForecast = false;
+    }
+
+    private string GetLayerButtonClass(string layer)
+        => $"weather-btn {(currentLayer == layer ? "active" : "")}";
+
+    public class WeatherForecast
+    {
+        public double Temperature { get; set; }
+        public double WindSpeed { get; set; }
+        public double WindDirection { get; set; }
+        public double Rain { get; set; }
+        public double Clouds { get; set; }
+        public double Humidity { get; set; }
+    }
+
+    private async Task<IEnumerable<string>> SearchLocations(string value, CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrEmpty(value))
+            return new string[] { };
+
+        try
+        {
+            using var client = new HttpClient();
+            // Use Nominatim API for geocoding
+            var response = await client.GetAsync(
+                $"https://nominatim.openstreetmap.org/search?format=json&q={Uri.EscapeDataString(value)}", 
+                cancellationToken);
+                
+            if (response.IsSuccessStatusCode)
+            {
+                var content = await response.Content.ReadFromJsonAsync<List<NominatimResult>>(cancellationToken: cancellationToken);
+                return content?.Select(x => x.display_name) ?? new string[] { };
+            }
+        }
+        catch (Exception)
+        {
+            // Handle or log the error appropriately
+        }
+        
+        return new string[] { };
+    }
+
+    private async Task OnLocationSelected(string location)
+    {
+        if (_module != null && !string.IsNullOrEmpty(location))
+        {
+            try
+            {
+                var response = await new HttpClient().GetAsync(
+                    $"https://nominatim.openstreetmap.org/search?format=json&q={Uri.EscapeDataString(location)}");
+                var results = await response.Content.ReadFromJsonAsync<List<NominatimResult>>();
+                
+                if (results?.Any() == true)
+                {
+                    var result = results.First();
+                    await _module.InvokeVoidAsync("centerMap", result.lat, result.lon);
+                }
+            }
+            catch
+            {
+                Snackbar.Add("Failed to find location", Severity.Error);
+            }
+        }
+    }
+
+    private async Task GetCurrentLocation()
+    {
+        if (_module != null)
+        {
+            await _module.InvokeVoidAsync("getCurrentLocation");
+        }
+    }
+
+    private async Task SwitchLayer(string layer)
+    {
+        currentLayer = layer;
+        await _module.InvokeVoidAsync("switchLayer", layer, mapForecastKey);
+    }
+
+    private class NominatimResult
+    {
+        public string display_name { get; set; } = "";
+        public string lat { get; set; } = "";
+        public string lon { get; set; } = "";
+    }
+} 

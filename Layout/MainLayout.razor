@@ -1,0 +1,86 @@
+﻿@inherits LayoutComponentBase
+@inject NavigationManager NavigationManager
+
+@* Required *@
+<MudThemeProvider />
+<MudPopoverProvider />
+
+@* Needed for dialogs *@
+<MudDialogProvider />
+
+@* Needed for snackbars *@
+<MudSnackbarProvider />
+
+<div class="page" style="background: linear-gradient(135deg, #2C3E50 0%, #3F4C6B 100%); min-height: 100vh; margin: 0; padding: 0; color: white;">
+    @if (!IsLoginPage)
+    {
+        <NavMenu />
+    }
+
+    <main style="display: flex; align-items: center; justify-content: center; min-height: 100vh; background: transparent; padding: 2rem;">
+        @Body
+    </main>
+</div>
+
+<style>
+    ::deep body, ::deep html {
+        margin: 0;
+        padding: 0;
+        background: linear-gradient(135deg, #2C3E50 0%, #3F4C6B 100%);
+        color: white;
+    }
+
+    ::deep .mud-main-content {
+        background: transparent !important;
+    }
+
+    ::deep .mud-input {
+        color: white !important;
+    }
+
+    ::deep .mud-input-label {
+        color: rgba(255, 255, 255, 0.9) !important;
+    }
+
+    ::deep .mud-input-outlined-border {
+        border-color: rgba(255, 255, 255, 0.5) !important;
+    }
+
+    ::deep .mud-card {
+        min-width: 500px;
+        min-height: 600px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background: rgba(255, 255, 255, 0.15);
+        backdrop-filter: blur(15px);
+        padding: 3rem;
+        margin: 2rem;
+    }
+
+    ::deep .mud-card-content {
+        padding: 2rem !important;
+    }
+
+    ::deep .mud-input-control {
+        margin-bottom: 1.5rem;
+    }
+
+    ::deep .mud-typography {
+        color: white;
+        margin-bottom: 1.5rem;
+    }
+
+    ::deep .mud-input::placeholder {
+        color: rgba(255, 255, 255, 0.5);
+    }
+
+    ::deep .mud-button {
+        margin-top: 1.5rem;
+    }
+</style>
+
+@code {
+    private bool IsLoginPage => 
+        NavigationManager.Uri.EndsWith("/login");
+}

@@ -1,0 +1,293 @@
+/* /Layout/MainLayout.razor.rz.scp.css */
+/*.page {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    background-color: #f4f4f4;
+    color: #333;
+}
+
+    .page.dark {
+        background-color: #1a1a1a;
+        color: #fff;
+    }
+
+main {
+    flex: 1;
+}
+
+.sidebar {
+    background-image: linear-gradient(180deg, rgb(5, 39, 103) 0%, #3a0647 70%);
+}
+
+.dark .sidebar {
+    background-image: linear-gradient(180deg, rgb(3, 24, 64) 0%, #2a0433 70%);
+}
+
+.top-row {
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #d6d5d5;
+    justify-content: flex-end;
+    height: 3.5rem;
+    display: flex;
+    align-items: center;
+}
+
+.dark .top-row {
+    background-color: #2d2d2d;
+    border-bottom: 1px solid #404040;
+}
+
+.top-row ::deep a,
+.top-row ::deep .btn-link {
+    white-space: nowrap;
+    margin-left: 1.5rem;
+    text-decoration: none;
+}
+
+    .top-row ::deep a:hover,
+    .top-row ::deep .btn-link:hover {
+        text-decoration: underline;
+    }
+
+    .top-row ::deep a:first-child {
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+.theme-toggle {
+    background: none;
+    border: none;
+    color: #666;
+    cursor: pointer;
+    padding: 0.5rem;
+    margin-right: 1rem;
+    font-size: 1.25rem;
+}
+
+.dark .theme-toggle {
+    color: #fff;
+}
+
+@media (max-width: 640.98px) {
+    .top-row {
+        justify-content: space-between;
+    }
+
+        .top-row ::deep a,
+        .top-row ::deep .btn-link {
+            margin-left: 0;
+        }
+}
+
+@media (min-width: 641px) {
+    .page {
+        flex-direction: row;
+    }
+
+    .sidebar {
+        width: 250px;
+        height: 100vh;
+        position: sticky;
+        top: 0;
+    }
+
+    .top-row {
+        position: sticky;
+        top: 0;
+        z-index: 1;
+    }
+
+        .top-row.auth ::deep a:first-child {
+            flex: 1;
+            text-align: right;
+            width: 0;
+        }
+
+    .top-row,
+    article {
+        padding-left: 2rem !important;
+        padding-right: 1.5rem !important;
+    }
+}
+*/
+.page.dark[b-9wo4xa3rto] {
+    background-color: #1a1a1a;
+    color: #fff;
+}
+/* /Layout/NavMenu.razor.rz.scp.css */
+.nav-scrollable[b-kgyahg9ozn] {
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(10px);
+  border-radius: 15px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  margin: 0.5rem;
+  padding: 0.5rem 0;
+  position: fixed;
+  right: 0;
+  top: 0;
+  width: 250px;
+  z-index: 1000;
+}
+
+.nav-link[b-kgyahg9ozn] {
+  color: white !important;
+  display: flex;
+  align-items: center;
+  padding: 0.5rem 1rem;
+  transition: background-color 0.3s;
+}
+
+.nav-link:hover[b-kgyahg9ozn] {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.nav-item[b-kgyahg9ozn] {
+  font-size: 0.9rem;
+  padding: 0.25rem 0.5rem;
+}
+
+[b-kgyahg9ozn] .mud-icon-root {
+  margin-right: 0.5rem;
+}
+
+.collapse[b-kgyahg9ozn] {
+  display: none;
+}
+/* /Pages/Weather.razor.rz.scp.css */
+/* General Styles */
+body[b-ndn58can4x] {
+    font-family: 'Roboto', sans-serif;
+    background: linear-gradient(135deg, #e0f7fa, #c5cae9);
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    color: #333;
+}
+
+.weather-container[b-ndn58can4x] {
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+    padding: 20px;
+    width: 90%;
+    max-width: 800px;
+    overflow: hidden;
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+    .weather-container:hover[b-ndn58can4x] {
+        transform: translateY(-5px);
+        box-shadow: 0 12px 24px rgba(0, 0, 0, 0.2);
+    }
+
+.weather-title[b-ndn58can4x] {
+    display: flex;
+    align-items: center;
+    color: #ff9800;
+    font-weight: bold;
+}
+
+.weather-wrapper[b-ndn58can4x] {
+    margin-top: 20px;
+    padding: 20px;
+    background: #e3f2fd;
+    border-radius: 10px;
+    box-shadow: inset 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.button-group[b-ndn58can4x] {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+    .button-group .mud-button[b-ndn58can4x], .button-group .mud-icon-button[b-ndn58can4x] {
+        margin-left: 10px;
+        transition: background 0.3s, color 0.3s;
+    }
+
+        .button-group .mud-button:hover[b-ndn58can4x], .button-group .mud-icon-button:hover[b-ndn58can4x] {
+            background: #ff9800;
+            color: white;
+        }
+
+.loading-indicator[b-ndn58can4x] {
+    text-align: center;
+    color: #757575;
+    margin-top: 20px;
+}
+
+.current-weather-card[b-ndn58can4x], .forecast-weather-card[b-ndn58can4x] {
+    margin-top: 20px;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+    .current-weather-card:hover[b-ndn58can4x], .forecast-weather-card:hover[b-ndn58can4x] {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+    }
+
+    .current-weather-card .mud-card-header[b-ndn58can4x], .forecast-weather-card .mud-card-header[b-ndn58can4x] {
+        background: #ff9800;
+        color: white;
+        border-radius: 10px 10px 0 0;
+        padding: 15px;
+        font-weight: bold;
+    }
+
+    .current-weather-card .mud-card-content[b-ndn58can4x], .forecast-weather-card .mud-card-content[b-ndn58can4x] {
+        padding: 20px;
+    }
+
+.mud-table[b-ndn58can4x] {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+    .mud-table th[b-ndn58can4x], .mud-table td[b-ndn58can4x] {
+        padding: 12px;
+        text-align: left;
+        border-bottom: 1px solid #e0e0e0;
+    }
+
+    .mud-table th[b-ndn58can4x] {
+        background: #f5f5f5;
+        color: #333;
+        font-weight: bold;
+    }
+
+    .mud-table td[b-ndn58can4x] {
+        color: #666;
+    }
+
+.mud-alert[b-ndn58can4x] {
+    margin-top: 20px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .weather-container[b-ndn58can4x] {
+        padding: 15px;
+    }
+
+    .weather-wrapper[b-ndn58can4x] {
+        padding: 15px;
+    }
+
+    .button-group[b-ndn58can4x] {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+        .button-group .mud-button[b-ndn58can4x], .button-group .mud-icon-button[b-ndn58can4x] {
+            margin-bottom: 10px;
+        }
+}

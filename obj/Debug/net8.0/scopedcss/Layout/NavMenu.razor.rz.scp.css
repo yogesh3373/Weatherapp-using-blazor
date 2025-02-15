@@ -1,0 +1,39 @@
+.nav-scrollable[b-kgyahg9ozn] {
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(10px);
+  border-radius: 15px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  margin: 0.5rem;
+  padding: 0.5rem 0;
+  position: fixed;
+  right: 0;
+  top: 0;
+  width: 250px;
+  z-index: 1000;
+}
+
+.nav-link[b-kgyahg9ozn] {
+  color: white !important;
+  display: flex;
+  align-items: center;
+  padding: 0.5rem 1rem;
+  transition: background-color 0.3s;
+}
+
+.nav-link:hover[b-kgyahg9ozn] {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.nav-item[b-kgyahg9ozn] {
+  font-size: 0.9rem;
+  padding: 0.25rem 0.5rem;
+}
+
+[b-kgyahg9ozn] .mud-icon-root {
+  margin-right: 0.5rem;
+}
+
+.collapse[b-kgyahg9ozn] {
+  display: none;
+}

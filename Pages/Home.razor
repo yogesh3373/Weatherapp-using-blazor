@@ -1,0 +1,170 @@
+﻿@page "/"
+@page "/home"
+@inject HttpClient Http
+@inject IJSRuntime JSRuntime
+@inject ISnackbar Snackbar
+
+<PageTitle>Home</PageTitle>
+
+<div class="weather-container" style="height: 100vh; padding: 0; margin: 0; background: linear-gradient(135deg, #2C3E50 0%, #3F4C6B 100%); color: white; display: flex; flex-direction: column; overflow: hidden;">
+    <MudText Typo="Typo.h3" Class="weather-title" Style="text-align: center; margin-bottom: 3vh; color: white; text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);">Weather Dashboard</MudText>
+
+    <MudGrid Style="gap: 3vh; flex: 1; margin: 0; padding: 2rem;">
+        <!-- Current Weather Section -->
+        <MudItem xs="12" Style="height: 45%;">
+            <MudCard Style="background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); border-radius: 15px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1); border: 1px solid rgba(255, 255, 255, 0.1); height: 100%;">
+                <MudCardContent Style="padding: 2rem; text-align: center; display: flex; flex-direction: column; justify-content: center;">
+                    @if (isLoading)
+                    {
+                        <MudSkeleton Width="100%" Height="100px" Class="my-2" />
+                    }
+                    else if (currentWeather != null)
+                    {
+                        <MudText Typo="Typo.h4" Style="color: white; margin-bottom: 1vh;">@currentWeather.Name</MudText>
+                        <MudText Typo="Typo.h1" Style="font-size: 3.5rem; font-weight: bold; color: white; margin-bottom: 1vh;">@((currentWeather.Main.Temp - 273.15).ToString("0.0")) °C</MudText>
+                        <MudText Typo="Typo.body1" Style="color: #e0e0e0; font-size: 1.2rem; margin-bottom: 0.5vh;">@currentWeather.Weather[0].Description</MudText>
+                        <MudText Typo="Typo.body2" Style="color: #e0e0e0;">Humidity: @currentWeather.Main.Humidity%</MudText>
+                    }
+                    else if (!string.IsNullOrEmpty(errorMessage))
+                    {
+                        <MudAlert Severity="Severity.Error">@errorMessage</MudAlert>
+                    }
+                </MudCardContent>
+            </MudCard>
+        </MudItem>
+
+        <!-- 5-Day Forecast Section -->
+        <MudItem xs="12" Style="height: 45%;">
+            <MudCard Style="background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); border-radius: 15px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1); border: 1px solid rgba(255, 255, 255, 0.1); height: 100%;">
+                <MudCardHeader Style="padding: 1rem 2rem;">
+                    <MudText Typo="Typo.h5" Style="color: white; font-weight: 500;">5-Day Forecast</MudText>
+                </MudCardHeader>
+                <MudCardContent Style="padding: 1rem;">
+                    <MudGrid Style="gap: 1vh; margin: 0;">
+                        @foreach (var item in forecastData?.List.Where((_, index) => index % 8 == 0) ?? Enumerable.Empty<ForecastItem>())
+                        {
+                            <MudItem xs="12" sm="6" md="4" lg="2" Style="padding: 0.25rem;">
+                                <MudPaper Style="text-align: center; padding: 0.8rem; background: rgba(255, 255, 255, 0.05); border-radius: 12px; transition: transform 0.2s; &:hover { transform: translateY(-5px); }">
+                                    <MudText Typo="Typo.body2" Style="color: #e0e0e0;">@DateTimeOffset.FromUnixTimeSeconds(item.Dt).DateTime.ToString("ddd, MMM d")</MudText>
+                                    <MudIcon Icon="@GetWeatherIcon(item.Weather[0].Description)" Size="Size.Medium" Class="my-2"  style="color: white;" />
+                                    <MudText Typo="Typo.h6" Style="color: white;">@((item.Main.Temp - 273.15).ToString("0.0")) °C</MudText>
+                                </MudPaper>
+                            </MudItem>
+                        }
+                    </MudGrid>
+                </MudCardContent>
+            </MudCard>
+        </MudItem>
+    </MudGrid>
+</div>
+
+@code {
+    private bool isLoading = false;
+    private string? errorMessage = null;
+    private CurrentWeather? currentWeather;
+    private ForecastResponse? forecastData;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await FetchWeatherByLocation();
+    }
+
+    private string GetWeatherIcon(string description)
+    {
+        // Replace this with logic to return appropriate weather icons
+        return description.Contains("cloud") ? Icons.Material.Filled.Cloud : Icons.Material.Filled.WbSunny;
+    }
+
+    private async Task FetchWeatherByLocation()
+    {
+        try
+        {
+            isLoading = true;
+            errorMessage = null;
+
+            var location = await GetCurrentLocation();
+            if (location != null)
+            {
+                string apiKey = "2c7aa567661f19ea0d12656093437448";
+                string url = $"https://api.openweathermap.org/data/2.5/weather?lat={location.Latitude}&lon={location.Longitude}&appid={apiKey}";
+
+                currentWeather = await Http.GetFromJsonAsync<CurrentWeather>(url);
+
+                // Fetch the 5-day forecast data
+                string forecastUrl = $"https://api.openweathermap.org/data/2.5/forecast?lat={location.Latitude}&lon={location.Longitude}&appid={apiKey}";
+                forecastData = await Http.GetFromJsonAsync<ForecastResponse>(forecastUrl);
+
+                if (currentWeather != null && forecastData != null)
+                {
+                    currentWeather.Name = forecastData.City.Name;
+                }
+            }
+            else
+            {
+                errorMessage = "Unable to access your location.";
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error: {ex.Message}";
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private async Task<Geolocation?> GetCurrentLocation()
+    {
+        try
+        {
+            return await JSRuntime.InvokeAsync<Geolocation>("getCurrentLocation");
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
+    public class CurrentWeather
+    {
+        public string Name { get; set; } = string.Empty;
+        public Main Main { get; set; } = new();
+        public WeatherCondition[] Weather { get; set; } = Array.Empty<WeatherCondition>();
+    }
+
+    public class Geolocation
+    {
+        public double Latitude { get; set; }
+        public double Longitude { get; set; }
+    }
+
+    public class Main
+    {
+        public double Temp { get; set; }
+        public int Humidity { get; set; }
+    }
+
+    public class WeatherCondition
+    {
+        public string Description { get; set; } = string.Empty;
+    }
+
+    public class City
+    {
+        public string Name { get; set; } = string.Empty;
+    }
+
+    public class ForecastResponse
+    {
+        public City City { get; set; } = new();
+        public List<ForecastItem> List { get; set; } = new();
+    }
+
+    public class ForecastItem
+    {
+        public Main Main { get; set; } = new();
+        public WeatherCondition[] Weather { get; set; } = Array.Empty<WeatherCondition>();
+        public long Dt { get; set; } // Unix timestamp format
+    }
+}

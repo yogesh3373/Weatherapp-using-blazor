@@ -1,0 +1,43 @@
+﻿@page "/register"
+@inject ISnackbar Snackbar
+@inject Supabase.Client SupabaseClient
+@inject NavigationManager Navigation
+@inject Blazored.LocalStorage.ILocalStorageService LocalStorage
+
+<MudCard Class="pa-4" Style=" padding-top:5rem; width:50vw;">
+    <MudStack Spacing="3" Style="padding:2rem;">
+        <MudTextField Label="Email" @bind-Value="Email" Placeholder="Enter your email" Required="true" Style="height: 3lh; " />
+        <MudTextField Label="Password" @bind-Value="Password" Placeholder="Enter your password" InputType="InputType.Password" Required="true" Style="height: 3lh; " />
+        <MudStack Direction="Row" Spacing="1">
+            <MudButton OnClick="RegisterUser" Variant="Variant.Outlined" Color="Color.Secondary">Register</MudButton>
+        </MudStack>
+        <div class="login-router-wrapper">
+            <span>Already have an account?</span>
+            <a class="login-link" style="color:cornflowerblue" href="/login">Log In</a>
+        </div>
+        @if (ErrorMessage != null)
+        {
+            <MudText Color="Color.Error">@ErrorMessage</MudText>
+        }
+    </MudStack>
+</MudCard>
+
+@code {
+    private string Email = string.Empty;
+    private string Password = string.Empty;
+    private string ErrorMessage;
+
+    private async Task RegisterUser()
+    {
+        try
+        {
+            await SupabaseClient.Auth.SignUp(Email, Password);
+            ErrorMessage = "Registration successful! You can now log in.";
+            Snackbar.Add("Register Successsful", Severity.Success);
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = $"Registration failed: {ex.Message}";
+        }
+    }
+}

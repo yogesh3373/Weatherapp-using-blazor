@@ -1,0 +1,214 @@
+@page "/weather-food"
+@using weather1.Services
+@using weather1.Models
+@inject IWeatherFoodService FoodService
+@inject ISnackbar Snackbar
+@inject HttpClient Http
+@inject IJSRuntime JSRuntime
+
+<MudContainer MaxWidth="MaxWidth.Large" Class="mt-4">
+    <MudPaper Class="pa-4 mb-4">
+        <MudTextField @bind-Value="searchLocation" 
+                     Label="Search Location" 
+                     Variant="Variant.Outlined"
+                     Adornment="Adornment.End" 
+                     AdornmentIcon="@Icons.Material.Filled.Search"
+                     OnKeyUp="@(async (e) => { if (e.Key == "Enter") await SearchLocation(); })"
+                     Class="mb-3"/>
+        
+        <MudButton Color="Color.Primary" 
+                  OnClick="FetchWeatherByLocation"
+                  StartIcon="@Icons.Material.Filled.MyLocation"
+                  Class="mb-3">
+            Use Current Location
+        </MudButton>
+    </MudPaper>
+
+    @if (isLoading)
+    {
+        <MudProgressCircular Color="Color.Primary" Indeterminate="true" />
+    }
+    else if (currentWeather != null && _foodRecommendation != null)
+    {
+        <MudGrid>
+            <MudItem xs="12">
+                <MudPaper Class="pa-4">
+                    <MudText Typo="Typo.h5">@currentWeather.Name</MudText>
+                    <MudText Typo="Typo.body1">
+                        Temperature: @((currentWeather.Main.Temp - 273.15).ToString("0.0"))°C | 
+                        Humidity: @currentWeather.Main.Humidity% | 
+                        Condition: @currentWeather.Weather[0].Description
+                    </MudText>
+                </MudPaper>
+            </MudItem>
+
+            <MudItem xs="12">
+                <MudCard>
+                    <MudCardContent>
+                        <MudGrid>
+                            <!-- Hydration Guide Section -->
+                            <MudItem xs="12" md="4">
+                                <MudText Typo="Typo.h5" Class="mb-4">Hydration Guide</MudText>
+                                <MudText>Recommended water intake: @_foodRecommendation.WaterIntake liters</MudText>
+                                @foreach (var tip in _foodRecommendation.HealthTips)
+                                {
+                                    <MudText Class="mt-2">• @tip</MudText>
+                                }
+                            </MudItem>
+
+                            <!-- Vertical Divider -->
+                            <MudItem xs="12" md="1" Style="display: flex; justify-content: center;">
+                                <MudDivider Vertical="true" FlexItem="true" Class="mx-4 my-6" />
+                            </MudItem>
+
+                            <!-- Recommended Foods Section -->
+                            <MudItem xs="12" md="7">
+                                <MudText Typo="Typo.h5" Class="mb-4">Recommended Foods</MudText>
+                                <MudGrid>
+                                    @foreach (var food in _foodRecommendation.RecommendedFoods)
+                                    {
+                                        <MudItem xs="12" sm="6">
+                                            <MudPaper Class="pa-4" Elevation="2">
+                                                <MudText Typo="Typo.h6">@food.Name</MudText>
+                                                <MudText Typo="Typo.body2">Category: @food.Category</MudText>
+                                                <MudText Typo="Typo.body2">Best Time: @food.TimeOfDay</MudText>
+                                                <MudDivider Class="my-2"/>
+                                                <MudText Typo="Typo.caption">Benefits:</MudText>
+                                                <div class="d-flex flex-wrap gap-1 mt-1">
+                                                    @foreach (var benefit in food.Benefits)
+                                                    {
+                                                        <MudText Typo="Typo.caption" 
+                                                                Class="pa-1 rounded mud-primary-text" 
+                                                                Style="background-color: var(--mud-palette-primary-hover);">
+                                                            @benefit
+                                                        </MudText>
+                                                    }
+                                                </div>
+                                            </MudPaper>
+                                        </MudItem>
+                                    }
+                                </MudGrid>
+                            </MudItem>
+                        </MudGrid>
+                    </MudCardContent>
+                </MudCard>
+            </MudItem>
+        </MudGrid>
+    }
+</MudContainer>
+
+@code {
+    private CurrentWeather? currentWeather;
+    private WeatherFoodRecommendation? _foodRecommendation;
+    private string searchLocation = string.Empty;
+    private bool isLoading = false;
+    private string? errorMessage = null;
+
+    public class CurrentWeather
+    {
+        public string Name { get; set; } = string.Empty;
+        public Main Main { get; set; } = new();
+        public WeatherCondition[] Weather { get; set; } = Array.Empty<WeatherCondition>();
+    }
+
+    public class Geolocation
+    {
+        public double Latitude { get; set; }
+        public double Longitude { get; set; }
+    }
+
+    public class Main
+    {
+        public double Temp { get; set; }
+        public int Humidity { get; set; }
+    }
+
+    public class WeatherCondition
+    {
+        public string Description { get; set; } = string.Empty;
+    }
+
+    private async Task FetchWeatherByLocation()
+    {
+        try
+        {
+            isLoading = true;
+            errorMessage = null;
+
+            var location = await GetCurrentLocation();
+            if (location != null)
+            {
+                string apiKey = "2c7aa567661f19ea0d12656093437448";
+                string url = $"https://api.openweathermap.org/data/2.5/weather?lat={location.Latitude}&lon={location.Longitude}&appid={apiKey}";
+
+                currentWeather = await Http.GetFromJsonAsync<CurrentWeather>(url);
+
+                if (currentWeather != null)
+                {
+                    // Get food recommendations based on weather
+                    _foodRecommendation = await FoodService.GetRecommendations(
+                        currentWeather.Main.Temp - 273.15, // Convert to Celsius
+                        currentWeather.Main.Humidity,
+                        currentWeather.Weather[0].Description
+                    );
+                }
+            }
+            else
+            {
+                errorMessage = "Unable to access your location.";
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error: {ex.Message}";
+            Snackbar.Add(errorMessage, Severity.Error);
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private async Task SearchLocation()
+    {
+        if (string.IsNullOrWhiteSpace(searchLocation)) return;
+
+        try
+        {
+            isLoading = true;
+            string apiKey = "2c7aa567661f19ea0d12656093437448";
+            string url = $"https://api.openweathermap.org/data/2.5/weather?q={Uri.EscapeDataString(searchLocation)}&appid={apiKey}";
+
+            currentWeather = await Http.GetFromJsonAsync<CurrentWeather>(url);
+
+            if (currentWeather != null)
+            {
+                _foodRecommendation = await FoodService.GetRecommendations(
+                    currentWeather.Main.Temp - 273.15,
+                    currentWeather.Main.Humidity,
+                    currentWeather.Weather[0].Description
+                );
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add("Location not found", Severity.Error);
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private async Task<Geolocation?> GetCurrentLocation()
+    {
+        try
+        {
+            return await JSRuntime.InvokeAsync<Geolocation>("getCurrentLocation");
+        }
+        catch
+        {
+            return null;
+        }
+    }
+}

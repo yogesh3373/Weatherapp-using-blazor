@@ -1,0 +1,73 @@
+﻿<div class="top-row ps-3 navbar navbar-dark" style="background-color: black;">
+    <div class="container-fluid">
+        <a class="" href="/home" style="color: white; text-decoration: none; font-size: 1.2rem;">WeatherApp</a>
+        <button title="Navigation menu" class="" @onclick="ToggleNavMenu">
+            <span>☰</span>
+        </button>
+    </div>
+</div>
+
+<div class="@NavMenuCssClass nav-scrollable" @onclick="ToggleNavMenu" style="background-color: black;">
+    <nav class="nav flex-column">
+        @if (!IsHomePage)
+        {
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="/home">
+                    Home
+                </NavLink>
+            </div>
+        }
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="/login">
+                Sign In
+            </NavLink>
+        </div> 
+        @if (!IsHomePage)
+        {
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="/Weather">
+                    Weather
+                </NavLink>
+            </div>
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="/wind-map">
+                    <MudIcon Icon="@Icons.Material.Filled.Air" Class="mr-2" />
+                    Wind Map
+                </NavLink>
+            </div>
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="/favorites">
+                    Favorites
+                </NavLink>
+            </div>
+            <div class="nav-item px-3">
+               <NavLink class="nav-link" href="/weather-food">
+                    <MudIcon Icon="@Icons.Material.Filled.Restaurant" Class="mr-2" />
+                    Food Recommendations
+                </NavLink>
+            </div>
+        }
+    </nav>
+</div>
+
+@code {
+    private bool collapseNavMenu = true;
+    private string? NavMenuCssClass => collapseNavMenu ? "collapse" : null;
+
+    [Inject]
+    private NavigationManager NavigationManager { get; set; } = default!;
+
+    private bool IsHomePage => 
+        NavigationManager.Uri.EndsWith("/home") || 
+        NavigationManager.Uri.EndsWith("/");
+
+    private void ToggleNavMenu()
+    {
+        collapseNavMenu = !collapseNavMenu;
+    }
+
+    protected override void OnInitialized()
+    {
+        NavigationManager.LocationChanged += (s, e) => StateHasChanged();
+    }
+}
