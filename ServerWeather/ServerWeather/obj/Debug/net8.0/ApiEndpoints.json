@@ -1,0 +1,60 @@
+[
+  {
+    "ContainingType": "ServerWeather.Controllers.UserFavoritesController",
+    "Method": "GetFavorites",
+    "RelativePath": "favorites",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "ServerWeather.Controllers.UserFavoritesController",
+    "Method": "GetFavoritesByEmail",
+    "RelativePath": "favorites/{email}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "email",
+        "Type": "System.String",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "ServerWeather.Controllers.UserFavoritesController",
+    "Method": "AddFavoriteCity",
+    "RelativePath": "favorites/add",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "request",
+        "Type": "ServerWeather.Entity.AddCityRequest",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "ServerWeather.Controllers.UserFavoritesController",
+    "Method": "RemoveFavoriteCity",
+    "RelativePath": "favorites/remove",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "request",
+        "Type": "ServerWeather.Controllers.UserFavoritesController\u002BRemoveCityRequest",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  }
+]

@@ -1,0 +1,12 @@
+{
+  "Version": 1,
+  "Hash": "ebxFEU2c1YfzKtMFH6MGzyaEuFmLIp//pgIbZttKqUI=",
+  "Source": "ServerWeather",
+  "BasePath": "_content/ServerWeather",
+  "Mode": "Default",
+  "ManifestType": "Build",
+  "ReferencedProjectsConfiguration": [],
+  "DiscoveryPatterns": [],
+  "Assets": [],
+  "Endpoints": []
+}
