@@ -1,4 +1,4 @@
-﻿@page "/weather"
+@page "/weather"
 @inject HttpClient Http
 @inject IJSRuntime JSRuntime
 @inject ISnackbar Snackbar
@@ -13,8 +13,7 @@
     }
 
     ::deep .mud-input {
-        background-color: rgba(255, 255, 255, 0.1);
-        border-radius: 8px;
+        background-color: white !important;
     }
 
     ::deep .mud-input-outlined {
@@ -22,7 +21,15 @@
     }
 
     ::deep .mud-input input {
-        color: #000000 !important; /* Change text color to black */
+        color: black !important;
+        background-color: white !important;
+        opacity: 1 !important;
+        font-weight: 600 !important;
+    }
+
+    ::deep .mud-input-label {
+        color: black !important;
+        opacity: 1 !important;
     }
 
     ::deep .mud-input.mud-input-outlined:hover {
@@ -34,7 +41,8 @@
     }
 
     ::deep .mud-input-adornment {
-        color: rgba(0, 0, 0, 0.7) !important; /* Change icon color to dark */
+        color: black !important;
+        opacity: 1 !important;
     }
 
     /* Style for the autocomplete dropdown */
@@ -50,6 +58,49 @@
     ::deep .mud-list-item:hover {
         background-color: rgba(0, 0, 0, 0.04);
     }
+
+    .weather-search {
+        background-color: white !important;
+    }
+
+    ::deep .mud-input-root {
+        background-color: white !important;
+    }
+
+    ::deep .mud-input-slot {
+        background-color: white !important;
+    }
+
+    .search-input {
+        background-color: rgba(0, 0, 0, 0.6) !important;
+    }
+
+    ::deep .mud-input {
+        background-color: rgba(0, 0, 0, 0.6) !important;
+    }
+
+    ::deep .mud-input input {
+        color: white !important;
+        font-weight: 600 !important;
+        font-size: 16px !important;
+        text-shadow: none !important;
+    }
+
+    ::deep .mud-input-label {
+        color: white !important;
+    }
+
+    ::deep .mud-input-adornment {
+        color: white !important;
+    }
+
+    ::deep .mud-input.mud-input-filled {
+        background-color: rgba(0, 0, 0, 0.6) !important;
+    }
+
+    ::deep .mud-input.mud-input-filled:hover {
+        background-color: rgba(0, 0, 0, 0.8) !important;
+    }
 </style>
 
 <MudContainer MaxWidth="MaxWidth.Large" Class="weather-container">
@@ -62,8 +113,7 @@
                     Variant="Variant.Filled"
                     Adornment="Adornment.Start"
                     AdornmentIcon="@Icons.Material.Filled.Search"
-                    Class="mud-input-dark"
-                    Style="background: rgba(255,255,255,0.1); border-radius: 12px;"
+                    Class="search-input"
                 />
             </MudItem>
             <MudItem xs="12" md="4" Class="d-flex align-center justify-end">
